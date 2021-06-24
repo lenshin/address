@@ -1,7 +1,10 @@
 from collections import defaultdict
 
-from config import BUILDING_ENTITY, BUILDING_KEY, COMMA_TAG, UNPARSED_KEY, STREET_KEY, STREET_TYPE_KEY, SEVERAL_STREETS
-from config import LEMMA
+from address_parser.postagger import POSTagger
+from address_parser.config import CHAR_PATH, LABEL_PATH, MODEL_SIZE_PATH, MODEL_PATH
+from address_parser.config import BUILDING_ENTITY, BUILDING_KEY, COMMA_TAG, UNPARSED_KEY, STREET_KEY
+from address_parser.config  import STREET_TYPE_KEY, SEVERAL_STREETS
+from address_parser.config import LEMMA
 
 
 def bio_tagging_fix(pred_tags):
@@ -17,12 +20,11 @@ def bio_tagging_fix(pred_tags):
     return pred_tags
 
 
-def bio_to_tags(tokens, pred_tags, probas):
+def bio_to_tags(tokens, pred_tags):
     pred_tags = bio_tagging_fix(pred_tags)
 
     new_pred_tags = [pred_tags[0][2:]]
     new_tokens = [tokens[0]]
-    new_probas = [probas[0]]
     prev = pred_tags[0]
 
     for index in range(1, len(tokens)):
@@ -32,9 +34,8 @@ def bio_to_tags(tokens, pred_tags, probas):
         else:
             new_tokens.append(tokens[index])
             new_pred_tags.append(pred_tags[index][2:])
-            new_probas.append(probas[index])
         prev = cur
-    return new_tokens, new_pred_tags, probas
+    return new_tokens, new_pred_tags
 
 
 def lemma_type(tokens, pred_tags):
@@ -43,11 +44,11 @@ def lemma_type(tokens, pred_tags):
             tokens[index] = LEMMA.get(tag).get(tokens[index], tokens[index])
     return tokens, pred_tags
 
-def process_tag(tokens, pred_tags, probas):
+def process_tag(tokens, pred_tags):
     answer = defaultdict(list)
     if len(tokens) < 1:
         return answer
-    tokens, pred_tags, probas = bio_to_tags(tokens, pred_tags, probas)
+    tokens, pred_tags = bio_to_tags(tokens, pred_tags)
     tokens, pred_tags = lemma_type(tokens, pred_tags)
 
     tag_checked = {COMMA_TAG}
@@ -73,26 +74,22 @@ def multi_street(address_dict):
         address_dict[STREET_TYPE_KEY] = [SEVERAL_STREETS]
 
 
-def extract_address(address_dict, probability=None):
+def extract_address(entity_dict):
     """
     Convert address_dict in list of addresses which contain in address string
     :address_dict: dict
-    :probability: probability that address parsed good enough
     """
     result = []
     main_adddress = {}
     # multi_street(address_dict)
-    for key, value in address_dict.items():
+    for key, value in entity_dict.items():
         if key == 'other':
             main_adddress[UNPARSED_KEY] = value
         elif key != BUILDING_KEY:
             main_adddress[key] = ", ".join(value)
 
-    if probability:
-        main_adddress['good_proba'] = round(probability, 2)
-
-    if address_dict.get(BUILDING_KEY):
-        for building in address_dict.get(BUILDING_KEY):
+    if entity_dict.get(BUILDING_KEY):
+        for building in entity_dict.get(BUILDING_KEY):
             sub_address = main_adddress.copy()
             sub_address.update(building)
             sub_address[UNPARSED_KEY] = sub_address.pop(UNPARSED_KEY, [])
@@ -101,3 +98,20 @@ def extract_address(address_dict, probability=None):
         main_adddress[UNPARSED_KEY] = main_adddress.pop(UNPARSED_KEY, [])
         result.append(main_adddress)
     return result
+
+
+class AddressParser:
+    def __init__(self):
+        self.model = POSTagger(MODEL_PATH, CHAR_PATH, LABEL_PATH, MODEL_SIZE_PATH)
+
+    def parse(self, texts):
+        if isinstance(texts, str):
+            texts = [texts]
+        tokens, tags = self.model(texts)
+        entity_dict = process_tag(tokens[0], tags[0])
+        result_dict = extract_address(entity_dict)
+        return result_dict
+
+    def __call__(self, texts):
+        return self.parse(texts)
+

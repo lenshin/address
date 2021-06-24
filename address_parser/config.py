@@ -1,16 +1,12 @@
 from pathlib import Path
 
-project_path = Path(__file__).resolve().parent
-models_path = project_path / 'models'
+project_path = Path(__file__).resolve().parent.parent
+models_path = project_path / 'model'
 
-model_number = 12
-CHAR_PATH = models_path / f'char_vocab_{model_number}.json'
-LABEL_PATH = models_path / f'label2id_{model_number}.json'
-MODEL_SIZE_PATH = models_path / f'model_size_{model_number}.json'
-MODEL_PATH = models_path / f'sentence_level_pos_{model_number}.pth'
-
-TFIDF_VECTORIZER_PATH = models_path / 'tfidf_vectorizer_1.pkl'
-GOOD_CLASSIFIER_PATH = models_path / 'classifier_1.pkl'
+CHAR_PATH = models_path / f'char_vocab.json'
+LABEL_PATH = models_path / f'label2id.json'
+MODEL_SIZE_PATH = models_path / f'model_size.json'
+MODEL_PATH = models_path / f'model_torch.pth'
 
 BUILDING_ENTITY = {
     'house', 'house_type',
