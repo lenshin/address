@@ -130,3 +130,9 @@ dmypy.json
 
 # IDEA
 .idea/
+
+# Notebooks
+notebooks/
+
+# Model
+model/
