@@ -3,17 +3,22 @@ from collections import defaultdict
 from address_parser.postagger import POSTagger
 from address_parser.config import CHAR_PATH, LABEL_PATH, MODEL_SIZE_PATH, MODEL_PATH
 from address_parser.config import BUILDING_ENTITY, BUILDING_KEY, COMMA_TAG, UNPARSED_KEY, STREET_KEY
-from address_parser.config  import STREET_TYPE_KEY, SEVERAL_STREETS
+from address_parser.config import STREET_TYPE_KEY, SEVERAL_STREETS
 from address_parser.config import LEMMA
 
 
 def bio_tagging_fix(pred_tags):
+    """
+    Fix BIO tagging mistakes
+    :param pred_tags: list of predicted tags
+    :return: list of fixed tags
+    """
     start = 0
     while start < len(pred_tags) and pred_tags[start][0] == 'I':
         pred_tags[start] = 'B-other'
         start += 1
     for index in range(start, len(pred_tags) - 1):
-        if pred_tags[index - 1][0] == 'I'\
+        if pred_tags[index - 1][0] == 'I' \
                 and (pred_tags[index - 1] == pred_tags[index + 1]) \
                 and (pred_tags[index - 1][2:] != pred_tags[index][2:]):
             pred_tags[index] = pred_tags[index - 1]
@@ -21,6 +26,12 @@ def bio_tagging_fix(pred_tags):
 
 
 def bio_to_tags(tokens, pred_tags):
+    """
+    Remove BIO tagging and join entities
+    :param tokens: list of tokens
+    :param pred_tags: predicted tags for the tokens
+    :return: list entities and tags
+    """
     pred_tags = bio_tagging_fix(pred_tags)
 
     new_pred_tags = [pred_tags[0][2:]]
@@ -39,12 +50,25 @@ def bio_to_tags(tokens, pred_tags):
 
 
 def lemma_type(tokens, pred_tags):
+    """
+    Address types lemmatization
+    :param tokens: list of tokens
+    :param pred_tags: list of tags
+    :return: list of tokens and tags
+    """
     for index, tag in enumerate(pred_tags):
         if tag in LEMMA.keys():
             tokens[index] = LEMMA.get(tag).get(tokens[index], tokens[index])
     return tokens, pred_tags
 
+
 def process_tag(tokens, pred_tags):
+    """
+    Collect all entities by type
+    :param tokens: list of tokens
+    :param pred_tags: list of tags
+    :return: dict of address entities in address sentence
+    """
     answer = defaultdict(list)
     if len(tokens) < 1:
         return answer
@@ -70,6 +94,11 @@ def process_tag(tokens, pred_tags):
 
 
 def multi_street(address_dict):
+    """
+    Check if several streets in address
+    :param address_dict: dict
+    :return: dict of address entities in address sentence
+    """
     if len(address_dict.get(STREET_KEY, [])) > 0:
         address_dict[STREET_TYPE_KEY] = [SEVERAL_STREETS]
 
@@ -77,7 +106,7 @@ def multi_street(address_dict):
 def extract_address(entity_dict):
     """
     Convert address_dict in list of addresses which contain in address string
-    :address_dict: dict
+    :address_dict: list of dicts
     """
     result = []
     main_adddress = {}
@@ -104,14 +133,18 @@ class AddressParser:
     def __init__(self):
         self.model = POSTagger(MODEL_PATH, CHAR_PATH, LABEL_PATH, MODEL_SIZE_PATH)
 
-    def parse(self, texts):
-        if isinstance(texts, str):
-            texts = [texts]
-        tokens, tags = self.model(texts)
+    def parse(self, text):
+        """
+        Parse address string
+        :param text: sting
+        :return: list of dicts
+        """
+        if isinstance(text, str):
+            text = [text]
+        tokens, tags = self.model(text)
         entity_dict = process_tag(tokens[0], tags[0])
-        result_dict = extract_address(entity_dict)
-        return result_dict
+        result = extract_address(entity_dict)
+        return result
 
-    def __call__(self, texts):
-        return self.parse(texts)
-
+    def __call__(self, text):
+        return self.parse(text)
