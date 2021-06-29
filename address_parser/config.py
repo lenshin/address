@@ -3,10 +3,10 @@ from pathlib import Path
 project_path = Path(__file__).resolve().parent.parent
 models_path = project_path / 'model'
 
-CHAR_PATH = models_path / f'char_vocab.json'
-LABEL_PATH = models_path / f'label2id.json'
-MODEL_SIZE_PATH = models_path / f'model_size.json'
-MODEL_PATH = models_path / f'model_torch.pth'
+CHAR_PATH = models_path / 'char_vocab.json'
+LABEL_PATH = models_path / 'label2id.json'
+MODEL_SIZE_PATH = models_path / 'model_size.json'
+MODEL_PATH = models_path / 'model_torch.pth'
 
 BUILDING_ENTITY = {
     'house', 'house_type',
@@ -113,29 +113,12 @@ LEMMA = {
         'сек': 'секция',
         'с': 'секция',
     },
-    'queue_type': {
-        'оч': 'очередь',
-    },
     'liter_type': {
         'литер': 'литера',
         'лит': 'литера',
     },
     'block_type': {
         'блк': 'блок',
-    },
-    'block-section_type': {
-
-    },
-    'stage_type': {
-
-    },
-    'sector_type': {
-        'уч': 'участок',
-    },
-    'gp_type': {
-        'гп': 'генеральный план',
-        'генплан': 'генеральный план',
-        'ген план': 'генеральный план',
     },
 }
 

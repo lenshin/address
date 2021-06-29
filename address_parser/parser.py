@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 from address_parser.postagger import POSTagger
+from address_parser.utils import show_predict
 from address_parser.config import CHAR_PATH, LABEL_PATH, MODEL_SIZE_PATH, MODEL_PATH
 from address_parser.config import BUILDING_ENTITY, BUILDING_KEY, COMMA_TAG, UNPARSED_KEY, STREET_KEY
 from address_parser.config import STREET_TYPE_KEY, SEVERAL_STREETS
@@ -133,18 +134,36 @@ class AddressParser:
     def __init__(self):
         self.model = POSTagger(MODEL_PATH, CHAR_PATH, LABEL_PATH, MODEL_SIZE_PATH)
 
+    def get_tags(self, text):
+        """
+        Split text on tokens and predict tags for tokens
+        :param text: str
+        :return: list of tokens and predict tags
+        """
+        if isinstance(text, str):
+            text = [text]
+        tokens, tags = self.model(text)
+        return tokens, tags
+
     def parse(self, text):
         """
         Parse address string
         :param text: sting
         :return: list of dicts
         """
-        if isinstance(text, str):
-            text = [text]
-        tokens, tags = self.model(text)
+        tokens, tags = self.get_tags(text)
         entity_dict = process_tag(tokens[0], tags[0])
         result = extract_address(entity_dict)
         return result
+
+    def display_parse(self, text):
+        """
+        Display parsed tokens
+        :param text: str
+        :return: None
+        """
+        tokens, tags = self.get_tags(text)
+        show_predict(tokens[0], tags[0])
 
     def __call__(self, text):
         return self.parse(text)
