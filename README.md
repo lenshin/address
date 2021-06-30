@@ -63,7 +63,7 @@ parser(address)
   'city': 'тверь',
   'street_type': 'улица',
   'street': 'оснабрюкская',
-  'rm_type': 'оф',
+  'rm_type': 'кв',
   'rm': '45',
   'house_type': 'дом',
   'house': '10',
