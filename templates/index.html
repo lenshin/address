@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Russian address parser</title>
+    <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.6/build/pure-min.css" integrity="sha384-Uu6IeWbM+gzNVXJcM9XV3SohHtmWE+3VGi496jvgX1jyvDTXfdK+rfZc8C1Aehk5" crossorigin="anonymous">
+
+</head>
+
+<h1> Address parser </h1>
+
+<body>
+<div>
+    <p>Input russian address</p>
+    <form class="pure-form" method="POST" action="/">
+        Address text:<br>
+        <input type="text" name="address"><br>
+        <button type="submit" class="pure-button pure-button-primary" value="Submit">Submit</button>
+    </form>
+</div>
+
+<br>
+<div>
+    {% if address %}
+        <p>Input address: </p>
+        <p> {{ address }} </p>
+        <p>Parse address: </p>
+        <p> {% print(prediction) %}</p>
+    {% endif %}
+</div>
+
+</body>
+</html>
