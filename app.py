@@ -16,4 +16,6 @@ def predict():
         prediction = model(address)
         prediction = json.dumps(prediction, indent=2, ensure_ascii=False)
     return render_template('index.html', address=address, prediction=prediction)
-app.run()
+
+if __name__ == "__main__":
+    app.run()
